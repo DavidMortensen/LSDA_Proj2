@@ -1,0 +1,5 @@
+[0m[[0m[31merror[0m] [0m[0m/Users/mads/Documents/ITU/4_semester/large_scale_data_analysis/git/LSDA_Proj2/src/main/scala/dk/itu/LSDA/projects/project2/partI/GoodReadsAnalysis.scala:35:73: not enough arguments for method apply: (n: Int)String in trait LinearSeqOptimized.[0m
+[0m[[0m[31merror[0m] [0m[0mUnspecified value parameter n.[0m
+[0m[[0m[31merror[0m] [0m[0m  bookReviews.flatMap(penis => penis.genres).distinct().collect().toList()[0m
+[0m[[0m[31merror[0m] [0m[0m                                                                        ^[0m
+[0m[[0m[31merror[0m] [0m[0mone error found[0m
