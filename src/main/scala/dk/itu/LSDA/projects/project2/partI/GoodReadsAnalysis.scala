@@ -44,7 +44,10 @@ object GoodReadsAnalysis {
     * @return a count
     */
     
-  //def genreBookCount(genre: String, bookReviews : RDD[BookReview]):Int = ???
+  def genreBookCount(genre: String, bookReviews : RDD[BookReview]):Int = {
+  bookReviews.flatMap(review => review.genres).filter(_.contains(genre)).count().toInt
+  }
+
 
   /**
     * generate a descendingly sorted list of pairs (genre, count of occurences)
@@ -52,8 +55,9 @@ object GoodReadsAnalysis {
     * @param bookGenres
     * @return pairs (genre, count of occurences)
     */
-  //def rankingByCounting(bookReviewsRDD: RDD[BookReview], bookGenres: List[String]): List[(String,Int)] = ???
-
+  def rankingByCounting(bookReviewsRDD: RDD[BookReview], bookGenres: List[String]): List[(String,Int)] = {
+  bookGenres.take(3).map(s => (s, genreBookCount(s, bookReviewsRDD))).sortBy(_._2).reverse
+    }
 
   //Approach 2:
   /**
@@ -89,10 +93,21 @@ object GoodReadsAnalysis {
     //find a list of distinct genres of the books
     val bookGenres = findBookGenres(bookReviewsRDD)
     //println(bookGenres)
-  
+
+/** --------------------------------------- */
+    //val genreCount = genreBookCount("Action", bookReviewsRDD)
+    //println("Printing genre count")
+    //println(genreCount)
+
+    val rankingByCount = rankingByCounting(bookReviewsRDD, bookGenres)
+    //println(rankingByCount)
+
+
+/** --------------------------------------- */
     //ranking  genres using counting technique
     println("First approach: Ranking by counting")
-  //  val countsApproach1: List[(String, Int)] = Timing.time(rankingByCounting(bookReviewsRDD,bookGenres))
+  val countsApproach1: List[(String, Int)] = Timing.time(rankingByCounting(bookReviewsRDD,bookGenres))
+  println(countsApproach1)
 
 
     //ranking genres using an index
