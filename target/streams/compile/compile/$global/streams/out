@@ -1,4 +1,4 @@
-[0m[[0m[31merror[0m] [0m[0m/Users/mads/Documents/ITU/4_semester/large_scale_data_analysis/git/LSDA_Proj2/src/main/scala/dk/itu/LSDA/projects/project2/partI/GoodReadsAnalysis.scala:59:1: not found: value bookReviews[0m
-[0m[[0m[31merror[0m] [0m[0mbookReviews.flatMap(review => review.genres)[0m
-[0m[[0m[31merror[0m] [0m[0m^[0m
-[0m[[0m[31merror[0m] [0m[0mone error found[0m
+[0m[[0m[33mwarn[0m] [0m[0m/Users/mads/Documents/ITU/4_semester/large_scale_data_analysis/git/LSDA_Proj2/src/main/scala/dk/itu/LSDA/projects/project2/partI/GoodReadsAnalysis.scala:95:3: a pure expression does nothing in statement position; you may be omitting necessary parentheses[0m
+[0m[[0m[33mwarn[0m] [0m[0m  usingIndex[0m
+[0m[[0m[33mwarn[0m] [0m[0m  ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mone warning found[0m

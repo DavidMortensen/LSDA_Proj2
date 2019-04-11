@@ -56,7 +56,9 @@ object GoodReadsAnalysis {
     * @return pairs (genre, count of occurences)
     */
   def rankingByCounting(bookReviewsRDD: RDD[BookReview], bookGenres: List[String]): List[(String,Int)] = {
-  bookGenres.take(3).map(s => (s, genreBookCount(s, bookReviewsRDD))).sortBy(_._2).reverse
+  //println(bookGenres.map(s => (s, genreBookCount(s, bookReviewsRDD))).sortBy(_._2).reverse)
+  bookGenres.map(s => (s, genreBookCount(s, bookReviewsRDD))).sortBy(_._2).reverse
+
     }
 
   //Approach 2:
@@ -64,16 +66,39 @@ object GoodReadsAnalysis {
     * create an index where each genre points to all the BookReview that it is mentioned in them
     * @param bookReviewsRDD
     * @param bookGenres
-    * @return an index that has the type: RDD[(String, Iterable[BookReview])]
+    * @return an index that has the type: RDD[(String, Iterable[BookReview])]  : RDD[(String, Iterable[BookReview])]
     */
-  //def generateIndex(bookReviewsRDD: RDD[BookReview], bookGenres: List[String]) : RDD[(String, Iterable[BookReview])] = ???
+  def generateIndex(bookReviewsRDD: RDD[BookReview], bookGenres: List[String]) : RDD[(String, Iterable[BookReview])]  = {
+  println()
+  println()
 
+  val tuple = bookGenres.map(genre => (genre, bookReviewsRDD.filter(review => review.genres.contains(genre)).collect().toList.toIterable))
+
+  //println(tuple)
+  val rdd = sc.parallelize(tuple)
+  rdd
+
+
+  }
+  
   /**
     * Using an index of (genres, BookReviews), generate a descendingly sorted list of pairs (genre, count of occurences)
     * @param bookReviewsGenresIndex
     * @return pairs (genre, count of occurences)
     */
-  //def rankingUsingIndex(bookReviewsGenresIndex: RDD[(String, Iterable[BookReview])]): List[(String,Int)] = ???
+  def rankingUsingIndex(bookReviewsGenresIndex: RDD[(String, Iterable[BookReview])]): List[(String,Int)] = {
+  println()
+  println()
+
+
+  val usingIndex = bookReviewsGenresIndex.map(genre =>(genre._1, genre._2.size)).collect().toList
+  usingIndex
+  val sorted = usingIndex.sortBy(_._2).reverse
+  print(sorted)
+  sorted
+
+  }
+
 
   //Approach 3:
   /**
@@ -106,16 +131,16 @@ object GoodReadsAnalysis {
 /** --------------------------------------- */
     //ranking  genres using counting technique
     println("First approach: Ranking by counting")
-  val countsApproach1: List[(String, Int)] = Timing.time(rankingByCounting(bookReviewsRDD,bookGenres))
-  println(countsApproach1)
+  // val countsApproach1: List[(String, Int)] = Timing.time(rankingByCounting(bookReviewsRDD,bookGenres))
+  // println(countsApproach1)
 
 
     //ranking genres using an index
     println("Second approach: Ranking by using an index")
     //create index
-    //val index = generateIndex(bookReviewsRDD,bookGenres)
-    //val countsApproach2: List[(String, Int)] = Timing.time(rankingUsingIndex(index))
-
+    val index = generateIndex(bookReviewsRDD,bookGenres)
+    val countsApproach2: List[(String, Int)] = Timing.time(rankingUsingIndex(index))
+    println(countsApproach2)
     //ranking genres using reduction
     //println("Third approach: Ranking by using ReduceByKey")
     //val countsApproach3 = Timing.time(rankingByReduction(bookReviewsRDD,bookGenres))
@@ -125,3 +150,4 @@ object GoodReadsAnalysis {
   }
 
 }
+
