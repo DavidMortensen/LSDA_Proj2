@@ -20,9 +20,16 @@ object YelpAnalysis {
     * @return a dataframe with one value representing the total number of reviews for all businesses
     */
   def totalReviewsSQL(yelpBusinesses : DataFrame):DataFrame = {
-      yelpBusinesses.createTempView("YelpBus")
-      spark.sql("SELECT sum(review_count) FROM YelpBus")
+      yelpBusinesses.createTempView("business")
+
+      val Q1 = spark.sql("SELECT sum(review_count) FROM business")
+      Q1.show
+      Q1
+
+
 }
+
+
   /**
     * use DataFrame transformations: add all the number of reviews for all businesses
     * @param yelpBusinesses
@@ -31,7 +38,7 @@ object YelpAnalysis {
   def totalReviewsbDF(yelpBusinesses : DataFrame):DataFrame = {
     yelpBusinesses.select(sum("review_count"))
   }
-  
+
   //Q2:
   /**
     * use SQL statements: find all businesses that have received 5 stars and that have been reviewed by 1000 or more users
@@ -39,11 +46,12 @@ object YelpAnalysis {
     * @return a Dataframe of (name, stars, review_count) of five star businesses
     */
   def fiveStarBusinessesSQL(yelpBusinesses: DataFrame):DataFrame = {
-    //yelpBusinesses.createTempView("YelpBus")
-    spark.sql("SELECT name, stars, review_count FROM YelpBus WHERE review_count > 1000 and stars = 5")
+    //yelpBusinesses.createTempView("business")
+    val Q2 = spark.sql("SELECT name, stars, review_count FROM business WHERE review_count >= 1000 and stars =5")
+    Q2.show()
+    Q2
   }
-
-  /**
+    /**
     * use DataFrame transformations: find all businesses that have received 5 stars and that have been reviewed by 1000 or more users
     * @param yelpBusinesses
     * @return a Dataframe of (name, stars, review_count) of five star businesses
@@ -59,9 +67,10 @@ object YelpAnalysis {
     * @return DataFrame of user_id of influencer users
     */
   def findInfluencerUserSQL(yelpUsers : DataFrame):DataFrame = {
-    yelpUsers.createTempView("YelpUsers")
-    spark.sql("SELECT user_id FROM YelpUsers WHERE review_count > 1000")
+    yelpUsers.createTempView("users")
+    spark.sql("SELECT user_id FROM users WHERE review_count > 1000")
   }
+  
 
   /**
     * use DataFrame transformations: find the influencer users who have written more than 1000 reviews
@@ -72,6 +81,7 @@ object YelpAnalysis {
     yelpUsers.select("user_id").filter("review_count > 1000")
   }
 
+
   //Q4:
   /**
     * use SQL statements: find the businesses that have been reviewed by more than 5 influencer users
@@ -81,9 +91,21 @@ object YelpAnalysis {
     * @return DataFrame of names of businesses that match the criteria
     */
   def findFamousBusinessesSQL(yelpBusinesses: DataFrame, yelpReviews: DataFrame, influencerUsers: DataFrame) : DataFrame = {
-    spark.sql("SELECT name FROM YelpBus WHERE review_count > 5")
-    }
+    yelpReviews.createTempView("reviews")
+    influencerUsers.createTempView("influencers")
 
+    val Q4 = spark.sql("""SELECT b.name
+              FROM reviews AS r
+              INNER JOIN  business AS b
+              ON b.business_id = r.business_id
+              INNER JOIN influencers AS i
+              ON i.user_id = r.user_id
+              GROUP BY b.name
+              HAVING COUNT(r.review_id) > 5""")
+
+    Q4.show()
+    Q4
+    }
   /**
     * use DataFrame transformations: find the businesses that have been reviewed by more than 5 influencer users
     * @param yelpBusinesses
@@ -91,7 +113,7 @@ object YelpAnalysis {
     * @param influencerUsersDF
     * @return DataFrame of names of businesses that match the criteria
     */
-  def findFamousBusinessesDF(yelpBusinesses: DataFrame, yelpReviews: DataFrame, influencerUsersDF: DataFrame): DataFrame = ???
+  //def findFamousBusinessesDF(yelpBusinesses: DataFrame, yelpReviews: DataFrame, influencerUsersDF: DataFrame): DataFrame = ???
 
   //Q5:
   /**
@@ -104,7 +126,7 @@ object YelpAnalysis {
     * @param yelpUsers
     * @return DataFrame of (user names and average stars)
     */
-  def findavgStarsByUserSQL(yelpReviews: DataFrame, yelpUsers: DataFrame):DataFrame = ???
+  //def findavgStarsByUserSQL(yelpReviews: DataFrame, yelpUsers: DataFrame):DataFrame = ???
 
   /**
     * use DataFrame transformations: find a descendingly ordered list of users based on their the average star counts given by each of them
@@ -116,7 +138,7 @@ object YelpAnalysis {
     * @param yelpUsers
     * @return DataFrame of (user names and average stars)
     */
-  def findavgStarsByUserDF(yelpReviews: DataFrame, yelpUsers: DataFrame):DataFrame = ???
+  //def findavgStarsByUserDF(yelpReviews: DataFrame, yelpUsers: DataFrame):DataFrame = ???
 
 
   def main(args: Array[String]): Unit = {
@@ -137,7 +159,7 @@ object YelpAnalysis {
     val yelpUsers = dataLoader(yelpUserFilePath)
     //println("Schema for users: "+ yelpUsers.schema)
 
-
+    
 
     // Q1: Analyze yelp_academic_dataset_Business.json to find the number of reviews for all businesses.
     // The output should be in the form of DataFrame of a single count.
@@ -147,16 +169,16 @@ object YelpAnalysis {
     println("total number of reviews - SQL query: "+ totalReviewsPerBusinessSQL.first().getLong(0))
     val totalReviewsPerBusinessDF = totalReviewsbDF(yelpBusiness)
 
-    //println("total number of reviews - DF Analysis: "+ totalReviewsPerBusinessDF.first().getLong(0))
-
+    println("total number of reviews - DF Analysis: "+ totalReviewsPerBusinessDF.first().getLong(0))
+   
 
     // Q2:  Analyze Analyze yelp_academic_dataset_Business.json to find all businesses that have received 5 stars and that have been reviewed by 1000 or more users
     println("Q2: query yelp_academic_dataset_Business.json to find businesses that have received 5 stars and that have been reviewed by 1000 or more users")
     val topBusinessesSQL = fiveStarBusinessesSQL(yelpBusiness)
     topBusinessesSQL.show()
-
     val topBusinessesDF = fiveStarBusinessesDF(yelpBusiness)
     topBusinessesDF.show()
+    
 
     // Q3:Analyze yelp_academic_dataset_users.json to find the influencer users who have written more than 1000 reviews.
     println("Q3: query yelp_academic_dataset_users.json to find influencers")
@@ -167,7 +189,13 @@ object YelpAnalysis {
     influencerUsersSQL.show()
 
     // Q4: Analyze yelp\_academic_dataset_review.json and a view created from your answer to Q3  to find names of businesses that have been reviewed by more than 5 influencer users.
-    println("Q3: query yelp_academic_dataset_reviews.json  to find businesses reviewd by more than 5 influencers")
+
+    println("Q4: query yelp_academic_dataset_reviews.json  to find businesses reviewd by more than 5 influencers")
+    val businessesReviewedByInfluencersSQL = findFamousBusinessesSQL(yelpBusiness , yelpReviews, influencerUsersDF)
+   
+   
+ /**
+    println("Q4: query yelp_academic_dataset_reviews.json  to find businesses reviewd by more than 5 influencers")
     val businessesReviewedByInfluencersDF = findFamousBusinessesDF(yelpBusiness, yelpReviews, influencerUsersDF)
 
     // Q5: Analyze yelp_academic_dataset_review.json  and yelp_academic_dataset_users.json to find the average stars given by each user. You need to order the users according to their average star counts.
@@ -175,7 +203,7 @@ object YelpAnalysis {
     //al avgStarsByUserSQL = findavgStarsByUserSQL(yelpReviews,yelpUsers)
 
     //val avgStarsByUserDF = findavgStarsByUserDF(yelpReviews, yelpUsers)
-
+    */
 
     spark.close()
   }
