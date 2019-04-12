@@ -1,4 +1,11 @@
-[0m[[0m[31merror[0m] [0m[0m/Users/mads/Documents/ITU/4_semester/large_scale_data_analysis/git/LSDA_Proj2/src/main/scala/dk/itu/LSDA/projects/project2/partII/YelpAnalysis.scala:203:45: not found: value findFamousBusinessesDF[0m
-[0m[[0m[31merror[0m] [0m[0m    val businessesReviewedByInfluencersDF = findFamousBusinessesDF(yelpBusiness, yelpReviews, influencerUsersDF)[0m
-[0m[[0m[31merror[0m] [0m[0m                                            ^[0m
+[0m[[0m[33mwarn[0m] [0m[0m/Users/mads/Documents/ITU/4_semester/large_scale_data_analysis/git/LSDA_Proj2/src/main/scala/dk/itu/LSDA/projects/project2/partII/YelpAnalysis.scala:154:3: a pure expression does nothing in statement position; you may be omitting necessary parentheses[0m
+[0m[[0m[33mwarn[0m] [0m[0m  Q5[0m
+[0m[[0m[33mwarn[0m] [0m[0m  ^[0m
+[0m[[0m[31merror[0m] [0m[0m/Users/mads/Documents/ITU/4_semester/large_scale_data_analysis/git/LSDA_Proj2/src/main/scala/dk/itu/LSDA/projects/project2/partII/YelpAnalysis.scala:163:10: type mismatch;[0m
+[0m[[0m[31merror[0m] [0m[0m found   : Unit[0m
+[0m[[0m[31merror[0m] [0m[0m required: org.apache.spark.sql.DataFrame[0m
+[0m[[0m[31merror[0m] [0m[0m    (which expands to)  org.apache.spark.sql.Dataset[org.apache.spark.sql.Row][0m
+[0m[[0m[31merror[0m] [0m[0m  println()[0m
+[0m[[0m[31merror[0m] [0m[0m         ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mone warning found[0m
 [0m[[0m[31merror[0m] [0m[0mone error found[0m
