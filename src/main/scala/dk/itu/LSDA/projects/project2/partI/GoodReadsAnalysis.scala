@@ -107,8 +107,11 @@ object GoodReadsAnalysis {
     * @param bookGenres
     * @return pairs (genre, count of occurences)
     */
-  //def rankingByReduction(bookReviewsRDD: RDD[BookReview], bookGenres: List[String]): List[(String,Int)] = ???
-
+  
+  //def rankingByReduction(bookReviewsRDD: RDD[BookReview], bookGenres: List[String]): List[(String,Int)] = {
+  //val reduct = bookReviewsRDD.collect()
+  //println(reduct)
+  //}
 
   def main(args: Array[String]): Unit = {
     //load file
