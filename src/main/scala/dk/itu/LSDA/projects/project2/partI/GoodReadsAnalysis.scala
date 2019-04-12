@@ -45,7 +45,7 @@ object GoodReadsAnalysis {
     */
     
   def genreBookCount(genre: String, bookReviews : RDD[BookReview]):Int = {
-  bookReviews.flatMap(review => review.genres).filter(_.contains(genre)).count().toInt
+  bookReviews.flatMap(review => review.genres).filter(_.equals(genre)).count().toInt
   }
 
 
@@ -55,11 +55,12 @@ object GoodReadsAnalysis {
     * @param bookGenres
     * @return pairs (genre, count of occurences)
     */
-  def rankingByCounting(bookReviewsRDD: RDD[BookReview], bookGenres: List[String]): List[(String,Int)] = {
+  def rankingByCounting(bookReviewsRDD: RDD[BookReview], bookGenres: List[String]): RDD[(String,Int)] = {
   //println(bookGenres.map(s => (s, genreBookCount(s, bookReviewsRDD))).sortBy(_._2).reverse)
-  bookGenres.map(s => (s, genreBookCount(s, bookReviewsRDD))).sortBy(_._2).reverse
+  sc.parallelize(bookGenres.map(s => (s, genreBookCount(s, bookReviewsRDD))).sortBy(_._2).reverse)
 
-    }
+
+  }
 
   //Approach 2:
   /**
@@ -72,12 +73,14 @@ object GoodReadsAnalysis {
   println()
   println()
 
-  val tuple = bookGenres.map(genre => (genre, bookReviewsRDD.filter(review => review.genres.contains(genre)).collect().toList.toIterable))
+  //val tuple = bookGenres.map(genre => (genre, bookReviewsRDD.filter(review => review.genres.contains(genre)).collect().toList.toIterable))
+  //val rdd = sc.parallelize(tuple)
+  //rdd
+
+  val tuple = bookReviewsRDD.flatMap(review => review.genres.map(genre => (genre, review))).groupByKey()
 
   //println(tuple)
-  val rdd = sc.parallelize(tuple)
-  rdd
-
+  tuple
 
   }
   
@@ -86,15 +89,13 @@ object GoodReadsAnalysis {
     * @param bookReviewsGenresIndex
     * @return pairs (genre, count of occurences)
     */
-  def rankingUsingIndex(bookReviewsGenresIndex: RDD[(String, Iterable[BookReview])]): List[(String,Int)] = {
+  def rankingUsingIndex(bookReviewsGenresIndex: RDD[(String, Iterable[BookReview])]): RDD[(String,Int)] = {
   println()
   println()
 
 
-  val usingIndex = bookReviewsGenresIndex.map(genre =>(genre._1, genre._2.size)).collect().toList
-  usingIndex
-  val sorted = usingIndex.sortBy(_._2).reverse
-  print(sorted)
+  val usingIndex = bookReviewsGenresIndex.map(genre =>(genre._1, genre._2.size))
+  val sorted = usingIndex.sortBy(-_._2)
   sorted
 
   }
@@ -107,11 +108,16 @@ object GoodReadsAnalysis {
     * @param bookGenres
     * @return pairs (genre, count of occurences)
     */
-  
-  //def rankingByReduction(bookReviewsRDD: RDD[BookReview], bookGenres: List[String]): List[(String,Int)] = {
+
+  def rankingByReduction(bookReviewsRDD: RDD[BookReview], bookGenres: List[String]): RDD[(String,Int)] = {
   //val reduct = bookReviewsRDD.collect()
-  //println(reduct)
-  //}
+  
+
+  val tuple = bookReviewsRDD.flatMap(review => review.genres.map(genre => (genre, 1))).reduceByKey(_ + _)
+  tuple
+  }
+
+  
 
   def main(args: Array[String]): Unit = {
     //load file
@@ -119,34 +125,30 @@ object GoodReadsAnalysis {
     val bookReviewsRDD = dataLoader(filePath)
 
     //find a list of distinct genres of the books
-    val bookGenres = findBookGenres(bookReviewsRDD)
+    val bookGenres = findBookGenres(bookReviewsRDD.persist())
+  
     //println(bookGenres)
 
-/** --------------------------------------- */
-    //val genreCount = genreBookCount("Action", bookReviewsRDD)
-    //println("Printing genre count")
-    //println(genreCount)
 
-    val rankingByCount = rankingByCounting(bookReviewsRDD, bookGenres)
-    //println(rankingByCount)
-
-
-/** --------------------------------------- */
     //ranking  genres using counting technique
     println("First approach: Ranking by counting")
-  // val countsApproach1: List[(String, Int)] = Timing.time(rankingByCounting(bookReviewsRDD,bookGenres))
-  // println(countsApproach1)
+    val countsApproach1: RDD[(String, Int)] = Timing.time(rankingByCounting(bookReviewsRDD,bookGenres))
 
 
     //ranking genres using an index
     println("Second approach: Ranking by using an index")
     //create index
     val index = generateIndex(bookReviewsRDD,bookGenres)
-    val countsApproach2: List[(String, Int)] = Timing.time(rankingUsingIndex(index))
-    println(countsApproach2)
+    val countsApproach2: RDD[(String, Int)] = Timing.time(rankingUsingIndex(index))
+
     //ranking genres using reduction
-    //println("Third approach: Ranking by using ReduceByKey")
-    //val countsApproach3 = Timing.time(rankingByReduction(bookReviewsRDD,bookGenres))
+    println()
+    println()
+    println()
+    println()
+
+    println("Third approach: Ranking by using ReduceByKey")
+    val countsApproach3 = Timing.time(rankingByReduction(bookReviewsRDD,bookGenres))
 
 
     sc.stop()
