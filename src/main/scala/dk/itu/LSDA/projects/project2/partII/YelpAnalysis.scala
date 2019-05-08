@@ -113,7 +113,33 @@ object YelpAnalysis {
     * @param influencerUsersDF
     * @return DataFrame of names of businesses that match the criteria
     */
-  //def findFamousBusinessesDF(yelpBusinesses: DataFrame, yelpReviews: DataFrame, influencerUsersDF: DataFrame): DataFrame = ???
+  def findFamousBusinessesDF(yelpBusinesses: DataFrame, yelpReviews: DataFrame, influencerUsersDF: DataFrame): DataFrame = {
+
+
+    val business = yelpBusinesses.as("b")
+
+    val remove1 = yelpReviews.withColumnRenamed("business_id","r_business_id")
+    val remove2 = remove1.withColumnRenamed("user_id","r_user_id")
+    val review = remove2.as("r")
+
+    val influencers = influencerUsersDF.as("i")
+
+    val df = business.join(review, col("b.business_id") === col("r.r_business_id"), "inner").join(influencers, col("r.r_user_id")===col("i.user_id"), "inner")
+    
+    val df_all_joined = df.select("name", "business_id","review_id")
+
+    val counter_review = df_all_joined.groupBy("business_id","name").agg(count("review_id").alias("cnt")).where(col("cnt")  > 5)
+
+    val select_bname = counter_review.select("name")
+    
+    
+
+
+    //println(select_bname.show(5))
+
+    select_bname
+
+  }
 
   //Q5:
   /**
@@ -215,8 +241,8 @@ object YelpAnalysis {
     val businessesReviewedByInfluencersSQL = findFamousBusinessesSQL(yelpBusiness , yelpReviews, influencerUsersDF)
    
    
-  //  println("Q4: query yelp_academic_dataset_reviews.json  to find businesses reviewd by more than 5 influencers")
-  //  val businessesReviewedByInfluencersDF = findFamousBusinessesDF(yelpBusiness, yelpReviews, influencerUsersDF)
+    println("Q4: query yelp_academic_dataset_reviews.json  to find businesses reviewd by more than 5 influencers")
+    val businessesReviewedByInfluencersDF = findFamousBusinessesDF(yelpBusiness, yelpReviews, influencerUsersDF)
 
     // Q5: Analyze yelp_academic_dataset_review.json  and yelp_academic_dataset_users.json to find the average stars given by each user. You need to order the users according to their average star counts.
     println("Q5: query yelp_academic_dataset_reviews.json, query yelp_academic_dataset_users.json to find average stars given by each user, descendingly ordered")
@@ -238,10 +264,10 @@ object YelpAnalysis {
                     """)
 
 
-
+*/
     //val avgStarsByUserDF = findavgStarsByUserDF(yelpReviews, yelpUsers)
-    */
 
     spark.close()
   }
 }
+
