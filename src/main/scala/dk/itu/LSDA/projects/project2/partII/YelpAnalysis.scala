@@ -182,9 +182,9 @@ object YelpAnalysis {
     * @param yelpUsers
     * @return DataFrame of (user names and average stars)
     */
-//  def findavgStarsByUserDF(yelpReviews: DataFrame, yelpUsers: DataFrame):DataFrame =???
+  def findavgStarsByUserDF(yelpReviews: DataFrame, yelpUsers: DataFrame):DataFrame ={
 
-/**
+
     println()
     println()
     println()
@@ -197,12 +197,16 @@ object YelpAnalysis {
     println()
     println()
 
-    val reviews = yelpReviews.as("r")
-    val remove1 = yelpUsers.withColumnRenamed("user_id","u_user_id")
-    val users = remove1.as("u")
+    yelpUsers.join(yelpReviews.groupBy("user_id").agg(avg("stars").alias("stars")), Seq("user_id"),"inner")
+      .orderBy($"stars".desc)
+      .select("name","stars")
 
-    val df = reviews.join(users, col("r.user_id") === col("u.u_user_id"),"inner")
-    val c = df.select("user_id","name","stars").groupBy("user_id").agg(mean("stars").alias("avg_stars"))
+    //val reviews = yelpReviews.as("r")
+    //val remove1 = yelpUsers.withColumnRenamed("user_id","u_user_id")
+    //val users = remove1.as("u")
+
+    //val df = reviews.join(users, col("r.user_id") === col("u.u_user_id"),"inner")
+    //val c = df.select("user_id","name","stars").groupBy("user_id").agg(mean("stars").alias("avg_stars"))
     //val f = c.groupBy("user_id").agg(mean("stars").alias("avg_stars"))
     //val g = f.select("name", "avg_stars")
     //val h = g.orderBy(desc("avg_star"))
@@ -211,24 +215,12 @@ object YelpAnalysis {
 
 
   
-    println(c.show(5))
+    //println(c.show(5))
 
-
-    println()
-    println()
-    println()
-    println()
-    println()
-    println()
-    println()
-    println()
-    println()
-    println()
-    println()
     
-    c
+    //c
     }
- */
+ 
 
   
   
@@ -295,7 +287,7 @@ object YelpAnalysis {
     val avgStarsByUserSQL = findavgStarsByUserSQL(yelpReviews,yelpUsers)
 
 
-    //val avgStarsByUserDF = findavgStarsByUserDF(yelpReviews, yelpUsers)
+    val avgStarsByUserDF = findavgStarsByUserDF(yelpReviews, yelpUsers)
 
     spark.close()
   }
