@@ -182,9 +182,9 @@ object YelpAnalysis {
     * @param yelpUsers
     * @return DataFrame of (user names and average stars)
     */
-  def findavgStarsByUserDF(yelpReviews: DataFrame, yelpUsers: DataFrame):DataFrame ={
+//  def findavgStarsByUserDF(yelpReviews: DataFrame, yelpUsers: DataFrame):DataFrame =???
 
-
+/**
     println()
     println()
     println()
@@ -202,16 +202,16 @@ object YelpAnalysis {
     val users = remove1.as("u")
 
     val df = reviews.join(users, col("r.user_id") === col("u.u_user_id"),"inner")
-    val c = df.select("user_id","name","stars")
-    val f = c.groupBy("user_id","name").agg(mean("stars").alias("avg_stars"))
-    val g = f.select("name", "avg_stars")
-    val h = g.orderBy(desc("avg_star"))
+    val c = df.select("user_id","name","stars").groupBy("user_id").agg(mean("stars").alias("avg_stars"))
+    //val f = c.groupBy("user_id").agg(mean("stars").alias("avg_stars"))
+    //val g = f.select("name", "avg_stars")
+    //val h = g.orderBy(desc("avg_star"))
     //val g = f.sort(desc("stars"))
 
 
 
-    
-    println(h.show(5))
+  
+    println(c.show(5))
 
 
     println()
@@ -226,10 +226,12 @@ object YelpAnalysis {
     println()
     println()
     
-    h
+    c
+    }
+ */
 
   
-  }
+  
 
 
   def main(args: Array[String]): Unit = {
@@ -291,25 +293,9 @@ object YelpAnalysis {
     // Q5: Analyze yelp_academic_dataset_review.json  and yelp_academic_dataset_users.json to find the average stars given by each user. You need to order the users according to their average star counts.
     println("Q5: query yelp_academic_dataset_reviews.json, query yelp_academic_dataset_users.json to find average stars given by each user, descendingly ordered")
     val avgStarsByUserSQL = findavgStarsByUserSQL(yelpReviews,yelpUsers)
- /**
 
 
-                    SELECT  name, avg_stars
-                      FROM
-                          (
-                          SELECT u.name as name, AVG(r.stars) as avg_stars, u.user_id
-                          FROM users as u
-                          INNER JOIN reviews as r
-                          ON u.user_id = r.user_id
-                          GROUP BY u.user_id
-                          )sub1
-                      ORDER BY avg_stars DESC
-
-                    """)
-
-
-*/
-    val avgStarsByUserDF = findavgStarsByUserDF(yelpReviews, yelpUsers)
+    //val avgStarsByUserDF = findavgStarsByUserDF(yelpReviews, yelpUsers)
 
     spark.close()
   }
