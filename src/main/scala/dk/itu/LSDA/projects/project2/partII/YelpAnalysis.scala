@@ -5,6 +5,8 @@ import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 
 object YelpAnalysis {
+  org.apache.log4j.Logger getLogger "org" setLevel (org.apache.log4j.Level.OFF)
+  org.apache.log4j.Logger getLogger "akka" setLevel (org.apache.log4j.Level.OFF)
 
   val spark = SparkSession.builder().appName("YelpReviewsAnalysis").master("local").getOrCreate()
 
@@ -182,6 +184,7 @@ object YelpAnalysis {
     * @param yelpUsers
     * @return DataFrame of (user names and average stars)
     */
+ /** 
   def findavgStarsByUserDF(yelpReviews: DataFrame, yelpUsers: DataFrame):DataFrame ={
 
 
@@ -222,7 +225,7 @@ object YelpAnalysis {
     }
  
 
-  
+ */
   
 
 
@@ -287,7 +290,7 @@ object YelpAnalysis {
     val avgStarsByUserSQL = findavgStarsByUserSQL(yelpReviews,yelpUsers)
 
 
-    val avgStarsByUserDF = findavgStarsByUserDF(yelpReviews, yelpUsers)
+    //val avgStarsByUserDF = findavgStarsByUserDF(yelpReviews, yelpUsers)
 
     spark.close()
   }

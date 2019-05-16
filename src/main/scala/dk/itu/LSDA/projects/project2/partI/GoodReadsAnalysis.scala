@@ -8,6 +8,8 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
 object GoodReadsAnalysis {
+  org.apache.log4j.Logger getLogger "org" setLevel (org.apache.log4j.Level.OFF)
+  org.apache.log4j.Logger getLogger "akka" setLevel (org.apache.log4j.Level.OFF)
 
   val log = LogManager.getRootLogger
   log.setLevel(INFO)
