@@ -158,16 +158,16 @@ object YelpAnalysis {
   
   
   val Q5 = spark.sql("""
-                        SELECT name, avg_star
+                        SELECT name, avg_stars
                         FROM
                             (
-                            SELECT u.user_id, u.name AS name, AVG(r.stars) AS avg_star
+                            SELECT u.user_id, u.name AS name, AVG(r.stars) AS avg_stars
                             FROM users AS u
                             INNER JOIN reviews AS r
                             ON r.user_id = u.user_id
                             GROUP BY u.user_id, name
                             )q1
-                        ORDER BY avg_star DESC""")
+                        ORDER BY avg_stars DESC""")
 
   
   
@@ -189,28 +189,19 @@ object YelpAnalysis {
   def findavgStarsByUserDF(yelpReviews: DataFrame, yelpUsers: DataFrame):DataFrame ={
 
 
-    yelpUsers.join(yelpReviews.groupBy("user_id").agg(avg("stars")).alias("avg_star"), Seq("user_id"),"inner")
-      .orderBy(col("avg_star").desc)
-      .select("name","avg_star")
+    val reviews = yelpReviews.as("r")
+    val remove1 = yelpUsers.withColumnRenamed("user_id","u_user_id")
+    val users = remove1.as("u")
 
-    //val reviews = yelpReviews.as("r")
-    //val remove1 = yelpUsers.withColumnRenamed("user_id","u_user_id")
-    //val users = remove1.as("u")
-
-    //val df = reviews.join(users, col("r.user_id") === col("u.u_user_id"),"inner")
-    //val c = df.select("user_id","name","stars").groupBy("user_id").agg(mean("stars").alias("avg_stars"))
-    //val f = c.groupBy("user_id").agg(mean("stars").alias("avg_stars"))
-    //val g = f.select("name", "avg_stars")
-    //val h = g.orderBy(desc("avg_star"))
-    //val g = f.sort(desc("stars"))
-
-
-
-  
-    //println(c.show(5))
+    val df = reviews.join(users, col("r.user_id") === col("u.u_user_id"),"inner")
+        .select("user_id","name","stars")
+        .groupBy("user_id","name")
+        .agg(avg("stars").alias("avg_stars"))
+        .orderBy(col("avg_stars").desc)
+        .select("name","avg_stars")
 
     
-    //c
+    df
     }
  
 
