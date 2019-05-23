@@ -71,7 +71,7 @@ object YelpAnalysis {
     */
   def findInfluencerUserSQL(yelpUsers : DataFrame):DataFrame = {
     yelpUsers.createTempView("users")
-    spark.sql("SELECT user_id FROM users WHERE review_count > 1000")
+    spark.sql("""SELECT user_id FROM users WHERE review_count > 1000""")
   }
   
 
@@ -127,7 +127,8 @@ object YelpAnalysis {
 
     val influencers = influencerUsersDF.as("i")
 
-    val df = business.join(review, col("b.business_id") === col("r.r_business_id"), "inner").join(influencers, col("r.r_user_id")===col("i.user_id"), "inner")
+    val df = business.join(review, col("b.business_id") === col("r.r_business_id"), "inner")
+                          .join(influencers, col("r.r_user_id")===col("i.user_id"), "inner")
     
     val df_all_joined = df.select("name", "business_id","review_id")
 
@@ -261,7 +262,6 @@ object YelpAnalysis {
     val businessesReviewedByInfluencersSQL = findFamousBusinessesSQL(yelpBusiness , yelpReviews, influencerUsersDF)
     businessesReviewedByInfluencersSQL.show()
    
-    println("Q4: query yelp_academic_dataset_reviews.json  to find businesses reviewd by more than 5 influencers")
     val businessesReviewedByInfluencersDF = findFamousBusinessesDF(yelpBusiness, yelpReviews, influencerUsersDF)
     businessesReviewedByInfluencersDF.show()
 
